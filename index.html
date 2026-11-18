@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Preloved Swap Board</title>
+<style>
+  :root {
+    --bg: #fdf6ec;
+    --card: #ffffff;
+    --ink: #43392e;
+    --muted: #97897a;
+    --green: #5e8c61;
+    --green-dark: #46704a;
+    --amber: #e0a53c;
+    --terracotta: #d97e5f;
+    --sand: #f0e5d4;
+    --sand-dark: #e3d4bc;
+    --taken-bg: #f6f1e7;
+    --shadow: 0 4px 14px rgba(93, 70, 40, 0.10);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Segoe UI", -apple-system, sans-serif;
+    background:
+      radial-gradient(circle at 10% 0%, rgba(224,165,60,0.12), transparent 45%),
+      radial-gradient(circle at 95% 5%, rgba(94,140,97,0.14), transparent 40%),
+      radial-gradient(circle at 50% 100%, rgba(217,126,95,0.10), transparent 45%),
+      var(--bg);
+    background-attachment: fixed;
+    color: var(--ink);
+    line-height: 1.5;
+  }
+  .wrap { max-width: 680px; margin: 0 auto; padding: 0 14px 60px; }
+
+  /* hero */
+  .hero {
+    text-align: center;
+    padding: 34px 16px 26px;
+  }
+  .hero .logo {
+    font-size: 2.6rem;
+    display: inline-block;
+    background: linear-gradient(135deg, var(--green), var(--amber));
+    border-radius: 24px;
+    padding: 10px 18px;
+    box-shadow: var(--shadow);
+    margin-bottom: 12px;
+  }
+  .hero h1 {
+    font-size: 1.9rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    background: linear-gradient(90deg, var(--green-dark), var(--terracotta));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .hero p { color: var(--muted); margin-top: 6px; font-size: 1rem; }
+  .hero .pills { margin-top: 14px; display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+  .pill {
+    background: var(--card);
+    border: 1px solid var(--sand-dark);
+    border-radius: 999px;
+    padding: 5px 14px;
+    font-size: 0.82rem;
+    color: var(--ink);
+    box-shadow: 0 2px 6px rgba(93,70,40,0.07);
+  }
+
+  /* sections */
+  section {
+    background: var(--card);
+    border-radius: 18px;
+    padding: 22px 18px;
+    margin-top: 22px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(227,212,188,0.6);
+  }
+  .sec-head { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+  .sec-head .icon {
+    width: 40px; height: 40px;
+    display: grid; place-items: center;
+    border-radius: 12px;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+  }
+  .icon.listings { background: rgba(94,140,97,0.15); }
+  .icon.add { background: rgba(224,165,60,0.2); }
+  .icon.taken { background: rgba(217,126,95,0.18); }
+  section h2 { font-size: 1.25rem; font-weight: 800; }
+  section .sub { color: var(--muted); font-size: 0.9rem; margin-bottom: 16px; }
+  .count-chip {
+    margin-left: auto;
+    background: var(--sand);
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 3px 10px;
+  }
+  .empty {
+    color: var(--muted); font-style: italic; font-size: 0.92rem;
+    padding: 18px; text-align: center;
+    background: var(--taken-bg);
+    border-radius: 12px;
+    border: 1px dashed var(--sand-dark);
+  }
+
+  /* filters */
+  .filters { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .filter-btn {
+    border: 1.5px solid var(--sand-dark);
+    background: var(--card);
+    color: var(--ink);
+    padding: 7px 16px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 0.88rem;
+    font-weight: 600;
+    transition: all .15s;
+  }
+  .filter-btn.active {
+    background: linear-gradient(135deg, var(--green), var(--green-dark));
+    border-color: transparent;
+    color: #fff;
+    box-shadow: 0 3px 8px rgba(94,140,97,0.35);
+  }
+
+  /* item cards */
+  .item-card {
+    background: var(--taken-bg);
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 12px;
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+    border: 1px solid rgba(227,212,188,0.8);
+    transition: transform .12s, box-shadow .12s;
+  }
+  .item-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+  .thumb {
+    width: 74px; height: 74px;
+    border-radius: 10px;
+    overflow: hidden;
+    flex-shrink: 0;
+    display: grid; place-items: center;
+    background: var(--sand);
+    font-size: 1.8rem;
+    border: 1px solid var(--sand-dark);
+  }
+  .thumb img, .thumb video { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .item-card .info { flex: 1; min-width: 0; }
+  .item-card .info h3 { font-size: 1rem; font-weight: 700; line-height: 1.3; }
+  .item-card .meta { font-size: 0.84rem; color: var(--muted); margin-top: 5px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 999px;
+    color: #fff;
+    letter-spacing: 0.3px;
+  }
+  .badge.give { background: linear-gradient(135deg, #6da571, var(--green-dark)); }
+  .badge.swap { background: linear-gradient(135deg, #ecb95c, #cf8f2a); }
+  .badge.hand { background: var(--sand-dark); color: var(--ink); }
+  .taken-btn {
+    align-self: center;
+    border: none;
+    background: linear-gradient(135deg, var(--terracotta), #c25f3d);
+    color: #fff;
+    padding: 9px 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 0.84rem;
+    font-weight: 700;
+    white-space: nowrap;
+    box-shadow: 0 3px 8px rgba(217,126,95,0.35);
+    transition: filter .15s;
+  }
+  .taken-btn:hover { filter: brightness(1.08); }
+
+  /* taken cards */
+  .taken-card {
+    background: var(--taken-bg);
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 12px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    border: 1px solid rgba(227,212,188,0.8);
+    position: relative;
+    overflow: hidden;
+  }
+  .taken-card::before {
+    content: "✔";
+    position: absolute;
+    right: 8px; top: 4px;
+    font-size: 2.6rem;
+    color: rgba(94,140,97,0.15);
+    font-weight: 800;
+  }
+  .taken-card h3 {
+    font-size: 0.98rem; text-decoration: line-through;
+    text-decoration-color: var(--terracotta); text-decoration-thickness: 2px;
+  }
+  .taken-card .meta { font-size: 0.84rem; color: var(--muted); margin-top: 5px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+
+  /* form */
+  form .field { margin-bottom: 14px; }
+  form label { display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 5px; }
+  form label .opt { font-weight: 400; color: var(--muted); }
+  form select, form input[type="text"] {
+    width: 100%;
+    padding: 11px 13px;
+    border: 1.5px solid var(--sand-dark);
+    border-radius: 10px;
+    font-size: 0.95rem;
+    background: var(--taken-bg);
+    color: var(--ink);
+    transition: border-color .15s;
+  }
+  form select:focus, form input:focus { outline: none; border-color: var(--green); }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* media picker */
+  .media-picker {
+    border: 2px dashed var(--sand-dark);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    cursor: pointer;
+    background: var(--taken-bg);
+    transition: border-color .15s, background .15s;
+  }
+  .media-picker:hover { border-color: var(--amber); background: #fbf3e4; }
+  .media-picker .big { font-size: 1.6rem; }
+  .media-picker .hint { font-size: 0.84rem; color: var(--muted); margin-top: 4px; }
+  .media-previews { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .media-chip {
+    position: relative;
+    width: 64px; height: 64px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2px solid var(--sand-dark);
+  }
+  .media-chip img, .media-chip video { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .media-chip .rm {
+    position: absolute; top: 2px; right: 2px;
+    width: 20px; height: 20px;
+    border: none; border-radius: 50%;
+    background: rgba(0,0,0,0.65);
+    color: #fff;
+    font-size: 0.72rem;
+    cursor: pointer;
+    line-height: 1;
+  }
+  .add-btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--green), var(--green-dark));
+    color: #fff;
+    border: none;
+    padding: 14px;
+    border-radius: 12px;
+    font-size: 1.02rem;
+    font-weight: 800;
+    cursor: pointer;
+    margin-top: 4px;
+    box-shadow: 0 4px 12px rgba(94,140,97,0.35);
+    transition: filter .15s, transform .1s;
+  }
+  .add-btn:hover { filter: brightness(1.07); }
+  .add-btn:active { transform: scale(0.98); }
+  .toast {
+    background: linear-gradient(135deg, var(--green), var(--green-dark));
+    color: #fff;
+    text-align: center;
+    padding: 11px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-top: 12px;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity .25s, transform .25s;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  footer { text-align: center; color: var(--muted); font-size: 0.82rem; margin-top: 26px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <div class="logo">🧺</div>
+    <h1>Preloved Swap Board</h1>
+    <p>Give away or swap preloved items with your neighbours 🏡</p>
+    <div class="pills">
+      <span class="pill">🤝 Free & friendly</span>
+      <span class="pill">📍 All over Malaysia</span>
+      <span class="pill">📦 Collection or delivery</span>
+    </div>
+  </div>
+
+  <!-- 1. Listings -->
+  <section id="listings">
+    <div class="sec-head">
+      <div class="icon listings">🛋️</div>
+      <h2>Listings</h2>
+      <span class="count-chip" id="listing-count"></span>
+    </div>
+    <p class="sub">What neighbours have posted. Tap “Mark taken” on an item to claim it.</p>
+    <div class="filters">
+      <button class="filter-btn active" data-filter="all">✨ All</button>
+      <button class="filter-btn" data-filter="give away">🎁 Give away</button>
+      <button class="filter-btn" data-filter="swap">🔄 Swap</button>
+    </div>
+    <div id="listing-list"></div>
+  </section>
+
+  <!-- 2. Add Item -->
+  <section id="add-item">
+    <div class="sec-head">
+      <div class="icon add">✏️</div>
+      <h2>Add Item</h2>
+    </div>
+    <p class="sub">Post something you'd like to give away or swap — photos help!</p>
+    <form id="add-form">
+      <div class="field">
+        <label for="f-name">Item name</label>
+        <input id="f-name" type="text" placeholder="e.g. Preloved story books" required>
+      </div>
+      <div class="field two-col">
+        <div>
+          <label for="f-type">Type</label>
+          <select id="f-type">
+            <option value="give away">🎁 Give away</option>
+            <option value="swap">🔄 Swap</option>
+          </select>
+        </div>
+        <div>
+          <label for="f-area">Area (Malaysia)</label>
+          <select id="f-area">
+            <option>Kuala Lumpur</option>
+            <option>Selangor</option>
+            <option>Penang</option>
+            <option>Johor Bahru</option>
+            <option>Ipoh</option>
+            <option>Melaka</option>
+            <option>Kuching</option>
+            <option>Kota Kinabalu</option>
+            <option>Shah Alam</option>
+            <option>Alor Setar</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label for="f-handover">Handover</label>
+        <select id="f-handover">
+          <option value="collection">🤲 Collection</option>
+          <option value="delivery">🚚 Delivery</option>
+        </select>
+      </div>
+      <div class="field" id="tracking-field" style="display:none;">
+        <label for="f-tracking">Tracking number <span class="opt">(optional)</span></label>
+        <input id="f-tracking" type="text" placeholder="e.g. JT1234567890">
+      </div>
+      <div class="field">
+        <label>Photos / videos <span class="opt">(optional)</span></label>
+        <div class="media-picker" id="media-picker" role="button" tabindex="0">
+          <div class="big">📸</div>
+          <div>Tap to add pictures or videos</div>
+          <div class="hint">Nothing is uploaded anywhere — shown on this screen only</div>
+        </div>
+        <input id="f-media" type="file" accept="image/*,video/*" multiple hidden>
+        <div class="media-previews" id="media-previews"></div>
+      </div>
+      <button type="submit" class="add-btn">➕ Add item</button>
+      <div class="toast" id="toast">🎉 Item added to the listings!</div>
+    </form>
+  </section>
+
+  <!-- 3. Taken -->
+  <section id="taken">
+    <div class="sec-head">
+      <div class="icon taken">✅</div>
+      <h2>Taken</h2>
+      <span class="count-chip" id="taken-count"></span>
+    </div>
+    <p class="sub">Items that have been claimed by neighbours.</p>
+    <div id="taken-list"></div>
+  </section>
+
+  <footer>Preloved Swap Board · a friendly board for neighbours · nothing is saved between visits</footer>
+</div>
+
+<script>
+  // Sample media as tiny inline SVG data URIs so the demo never depends on external files.
+  const svgThumb = (bg, emoji) => "data:image/svg+xml," + encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160"><rect width="160" height="160" fill="${bg}"/><text x="50%" y="54%" font-size="64" text-anchor="middle" dominant-baseline="middle">${emoji}</text></svg>`
+  );
+
+  let items = [
+    { id: 1, name: "Preloved children's story books (12 books)", type: "give away", area: "Kuala Lumpur", handover: "collection", tracking: "", taken: false,
+      media: [{ kind: "image", src: svgThumb("#e8d9bd", "📚") }] },
+    { id: 2, name: "Rice cooker (still working well)", type: "swap", area: "Penang", handover: "collection", tracking: "", taken: false,
+      media: [{ kind: "image", src: svgThumb("#d9e6d3", "🍚") }] },
+    { id: 3, name: "Baby clothes bundle, 0–12 months", type: "give away", area: "Johor Bahru", handover: "delivery", tracking: "JD8820475512", taken: false,
+      media: [{ kind: "image", src: svgThumb("#f2ddcf", "👶") }] }
+  ];
+  let nextId = 4;
+  let filter = "all";
+  let pendingMedia = []; // {kind:'image'|'video', src}
+
+  const listingList = document.getElementById("listing-list");
+  const takenList = document.getElementById("taken-list");
+  const listingCount = document.getElementById("listing-count");
+  const takenCount = document.getElementById("taken-count");
+
+  function esc(s) {
+    const d = document.createElement("div");
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  function thumbHTML(item) {
+    if (item.media && item.media.length > 0) {
+      const m = item.media[0];
+      return m.kind === "video"
+        ? `<video src="${m.src}" muted playsinline></video>`
+        : `<img src="${m.src}" alt="">`;
+    }
+    const emoji = item.type === "give away" ? "🎁" : "🔄";
+    return emoji;
+  }
+
+  function badgesHTML(i) {
+    const type = i.type === "give away"
+      ? '<span class="badge give">🎁 Give away</span>'
+      : '<span class="badge swap">🔄 Swap</span>';
+    const hand = i.handover === "collection"
+      ? '<span class="badge hand">🤲 Collection</span>'
+      : '<span class="badge hand">🚚 Delivery</span>' + (i.tracking ? `<span class="badge hand">🔖 ${esc(i.tracking)}</span>` : "");
+    return type + hand;
+  }
+
+  function render() {
+    const available = items.filter(i => !i.taken);
+    const visible = available.filter(i => filter === "all" || i.type === filter);
+    listingCount.textContent = available.length + " available";
+
+    if (visible.length === 0) {
+      listingList.innerHTML = '<p class="empty">No items here yet. Try another filter or add one below. 🌱</p>';
+    } else {
+      listingList.innerHTML = visible.map(i => `
+        <div class="item-card">
+          <div class="thumb">${thumbHTML(i)}</div>
+          <div class="info">
+            <h3>${esc(i.name)}</h3>
+            <div class="meta">${badgesHTML(i)}<span>${esc(i.area)}</span></div>
+          </div>
+          <button class="taken-btn" data-take="${i.id}">Mark taken</button>
+        </div>
+      `).join("");
+    }
+
+    const taken = items.filter(i => i.taken);
+    takenCount.textContent = taken.length + " claimed";
+    if (taken.length === 0) {
+      takenList.innerHTML = '<p class="empty">Nothing taken yet. Items you claim will appear here. 🧡</p>';
+    } else {
+      takenList.innerHTML = taken.map(i => `
+        <div class="taken-card">
+          <div class="thumb">${thumbHTML(i)}</div>
+          <div>
+            <h3>${esc(i.name)}</h3>
+            <div class="meta">${badgesHTML(i)}<span>${esc(i.area)}</span></div>
+          </div>
+        </div>
+      `).join("");
+    }
+  }
+
+  // Mark as taken
+  listingList.addEventListener("click", e => {
+    const btn = e.target.closest("[data-take]");
+    if (!btn) return;
+    const item = items.find(i => i.id === Number(btn.dataset.take));
+    if (item) { item.taken = true; render(); }
+  });
+
+  // Filter by type
+  document.querySelectorAll(".filter-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      filter = btn.dataset.filter;
+      document.querySelectorAll(".filter-btn").forEach(b => b.classList.toggle("active", b === btn));
+      render();
+    });
+  });
+
+  // Media picker
+  const mediaInput = document.getElementById("f-media");
+  const mediaPreviews = document.getElementById("media-previews");
+  document.getElementById("media-picker").addEventListener("click", () => mediaInput.click());
+  document.getElementById("media-picker").addEventListener("keydown", e => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); mediaInput.click(); }
+  });
+  mediaInput.addEventListener("change", () => {
+    for (const file of mediaInput.files) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        pendingMedia.push({ kind: file.type.startsWith("video") ? "video" : "image", src: reader.result });
+        renderPreviews();
+      };
+      reader.readAsDataURL(file);
+    }
+    mediaInput.value = "";
+  });
+  function renderPreviews() {
+    mediaPreviews.innerHTML = pendingMedia.map((m, idx) => `
+      <div class="media-chip">
+        ${m.kind === "video" ? `<video src="${m.src}" muted playsinline></video>` : `<img src="${m.src}" alt="">`}
+        <button type="button" class="rm" data-rm="${idx}" aria-label="Remove">✕</button>
+      </div>
+    `).join("");
+  }
+  mediaPreviews.addEventListener("click", e => {
+    const btn = e.target.closest("[data-rm]");
+    if (!btn) return;
+    pendingMedia.splice(Number(btn.dataset.rm), 1);
+    renderPreviews();
+  });
+
+  // Handover -> tracking field
+  const handoverSel = document.getElementById("f-handover");
+  const trackingField = document.getElementById("tracking-field");
+  handoverSel.addEventListener("change", () => {
+    trackingField.style.display = handoverSel.value === "delivery" ? "block" : "none";
+  });
+
+  // Add item
+  document.getElementById("add-form").addEventListener("submit", e => {
+    e.preventDefault();
+    const name = document.getElementById("f-name").value.trim();
+    if (!name) return;
+    items.unshift({
+      id: nextId++,
+      name,
+      type: document.getElementById("f-type").value,
+      area: document.getElementById("f-area").value,
+      handover: handoverSel.value,
+      tracking: document.getElementById("f-tracking").value.trim(),
+      media: pendingMedia.slice(),
+      taken: false
+    });
+    e.target.reset();
+    pendingMedia = [];
+    renderPreviews();
+    trackingField.style.display = "none";
+    render();
+    const toast = document.getElementById("toast");
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 2500);
+  });
+
+  render();
+</script>
+</body>
+</html>
